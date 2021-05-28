@@ -1,5 +1,4 @@
 from django.db import models
-# TODO: verificar relacionamento n:n de sala com agendamento, creio que não precisa de uma nova tabela
 
 
 class VaccineLocation(models.Model):
@@ -90,7 +89,7 @@ class Appointments(models.Model):
 
 
 class VaccinationRoom(models.Model):
-    name = models.CharField(verbose_name="Sala", max_length=200)
+    name = models.CharField(verbose_name="Sala de vacinação", max_length=200)
     id_location = models.ForeignKey(VaccineLocation, on_delete=models.CASCADE, verbose_name="Ponto de vacinação")
 
     def __str__(self):
@@ -100,3 +99,16 @@ class VaccinationRoom(models.Model):
         verbose_name = "Sala de vacinação"
         verbose_name_plural = "Salas de vacinação"
 
+
+class AppointmentRoom(models.Model):
+    vacancies = models.IntegerField(verbose_name="Número de vagas")
+    id_room = models.ForeignKey(VaccinationRoom, on_delete=models.CASCADE, verbose_name="Sala de vacinação")
+    id_appointment = models.ForeignKey(AvailableAppointments, on_delete=models.CASCADE,
+                                       verbose_name="Agendamento disponível")
+
+    def __str__(self):
+        return f"{self.id_appointment.__str__()} - {self.id_room.__str__()} - {self.vacancies} vagas"
+
+    class Meta:
+        verbose_name = "Quantidade de vagas para o agendamento"
+        verbose_name_plural = "Quantidades de vagas para o agendamento"
