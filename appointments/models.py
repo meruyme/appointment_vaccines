@@ -1,4 +1,5 @@
 from django.db import models
+# TODO: verificar relacionamento n:n de sala com agendamento, creio que não precisa de uma nova tabela
 
 
 class VaccineLocation(models.Model):
