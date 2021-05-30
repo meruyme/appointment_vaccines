@@ -1,4 +1,68 @@
 from django.db import models
+from django.contrib.auth.models import BaseUserManager, AbstractBaseUser
+from django.conf import settings
+
+Citizen = settings.AUTH_USER_MODEL
+
+
+class UserManager(BaseUserManager):
+    def create_user(self, email, name, date_birth, password=None):
+        user = self.model(
+            email=self.normalize_email(email),
+            name=name,
+            date_birth=date_birth
+        )
+        user.set_password(password)
+        user.save()
+        return user
+
+    def create_superuser(self, email, name, date_birth, password=None):
+        user = self.create_user(
+            email=self.normalize_email(email),
+            name=name,
+            date_birth=date_birth,
+            password=password
+        )
+        user.is_admin = True
+        user.save()
+        return user
+
+
+class User(AbstractBaseUser):
+    email = models.EmailField(verbose_name="E-mail", unique=True)
+    name = models.CharField(verbose_name="Nome completo", max_length=200)
+    date_birth = models.DateField(verbose_name="Data de nascimento")
+    is_active = models.BooleanField(default=True)
+    is_admin = models.BooleanField(default=False, verbose_name="Administrador")
+
+    USERNAME_FIELD = "email"
+    REQUIRED_FIELDS = ['name', 'date_birth']
+
+    objects = UserManager()
+
+    def get_full_name(self):
+        return self.email
+
+    def get_short_name(self):
+        return self.email
+
+    def __str__(self):
+        return self.email
+
+    def has_perm(self, perm, obj=None):
+        return True
+
+    def has_module_perms(self, app_label):
+        return True
+
+    @property
+    def is_staff(self):
+        return self.is_admin
+
+    class Meta:
+        verbose_name = "Usuário"
+        verbose_name_plural = "Usuários"
+        ordering = ['name']
 
 
 class VaccineLocation(models.Model):
@@ -14,6 +78,7 @@ class VaccineLocation(models.Model):
     class Meta:
         verbose_name = "Ponto de vacinação"
         verbose_name_plural = "Pontos de vacinação"
+        ordering = ['city', 'name']
 
 
 class Vaccine(models.Model):
@@ -26,20 +91,7 @@ class Vaccine(models.Model):
     class Meta:
         verbose_name = "Vacina"
         verbose_name_plural = "Vacinas"
-
-
-class Citizen(models.Model):
-    name = models.CharField(verbose_name="Nome completo", max_length=200)
-    birth = models.DateField(verbose_name="Data de nascimento")
-    email = models.EmailField(verbose_name="E-mail")
-    password = models.CharField(verbose_name="Senha", max_length=20)
-
-    def __str__(self):
-        return self.name
-
-    class Meta:
-        verbose_name = "Cidadão"
-        verbose_name_plural = "Cidadãos"
+        ordering = ['name']
 
 
 class ServiceGroup(models.Model):
@@ -52,6 +104,7 @@ class ServiceGroup(models.Model):
     class Meta:
         verbose_name = "Grupo de atendimento"
         verbose_name_plural = "Grupos de atendimento"
+        ordering = ['-name', '-min_age']
 
 
 class AvailableAppointments(models.Model):
@@ -65,6 +118,7 @@ class AvailableAppointments(models.Model):
     class Meta:
         verbose_name = "Agendamento disponível"
         verbose_name_plural = "Agendamentos disponíveis"
+        ordering = ['date_appointment', 'time_appointment']
 
 
 class Appointments(models.Model):
@@ -95,9 +149,14 @@ class VaccinationRoom(models.Model):
     def __str__(self):
         return f"{self.name} - {self.id_location.__str__()}"
 
+    def get_location(self):
+        return self.id_location.name
+    get_location.short_description = 'Ponto de vacinação'
+
     class Meta:
         verbose_name = "Sala de vacinação"
         verbose_name_plural = "Salas de vacinação"
+        ordering = ['name']
 
 
 class AppointmentRoom(models.Model):

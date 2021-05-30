@@ -1,3 +1,2 @@
 from django.shortcuts import render
-
-# Create your views here.
+from appointments.models import VaccineLocation
