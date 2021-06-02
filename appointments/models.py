@@ -135,6 +135,7 @@ class Appointments(models.Model):
                                   verbose_name="Agendamento escolhido")
     group = models.ForeignKey(ServiceGroup, on_delete=models.CASCADE, verbose_name="Grupo de atendimento")
     citizen = models.OneToOneField(Citizen, on_delete=models.CASCADE, verbose_name="Cidadão")
+    date = models.DateField(verbose_name="Data do agendamento", auto_now_add=True)
 
     def __str__(self):
         return f"{self.citizen.name}: {self.available.__str__()} " \
