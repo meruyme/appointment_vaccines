@@ -7,8 +7,7 @@ from appointments.forms import AutoCreateUserForm, CreateAppointmentForm, Search
 from appointments.models import Appointments, ServiceGroup, Vaccine
 from plotly.offline import plot
 from datetime import datetime, timedelta, date
-import pandas as pd
-import plotly.express as px
+import plotly.graph_objects as go
 
 
 def create_citizen(request):
@@ -127,19 +126,19 @@ def create_charts(request):
         quantity_appointments = Appointments.objects.filter(
             available__vaccine__manufacturer=manufacturer).count()
         if quantity_appointments > 0:
-            labels_pie.append(manufacturer)
             values_pie.append(quantity_appointments)
+            labels_pie.append(manufacturer)
 
-    d_pie = {'Fabricante': labels_pie, 'Agendamentos': values_pie}
-    df_pie = pd.DataFrame(d_pie)
+    pie_chart = go.Pie(labels=labels_pie, values=values_pie)
 
-    pie_chart = px.pie(df_pie, values='Agendamentos', names='Fabricante',
-                       title='Agendamentos por fabricante', width=560, height=420,
-                       color_discrete_sequence=px.colors.sequential.Purp)
-    pie_chart.update_layout(
-        font=dict(family="Century Gothic", color="#7386D5")
-    )
-    plot_div_pie = plot({'data': pie_chart},
+    layout_pie = {
+        'title': 'Agendamentos por fabricante',
+        'height': 420,
+        'width': 560,
+        'font': dict(family="Century Gothic", color='#7386D5')
+    }
+
+    plot_div_pie = plot({'data': pie_chart, 'layout': layout_pie},
                         output_type='div')
 
     labels_bar = []
@@ -156,18 +155,17 @@ def create_charts(request):
             date=day).count()
         values_bar.append(appointments_date)
 
-    d_bar = {'Dia': labels_bar, 'Agendamento': values_bar}
-    df_bar = pd.DataFrame(d_bar)
+    bar_chart = go.Bar(x=labels_bar, y=values_bar)
 
-    bar_chart = px.bar(df_bar, y='Agendamento', x='Dia',
-                       title='Agendamentos nos últimos 7 dias', width=560, height=420,
-                       color_discrete_sequence=px.colors.sequential.Purp)
+    layout_bar = {
+        'title': 'Agendamentos nos últimos 7 dias',
+        'height': 420,
+        'width': 560,
+        'font': dict(family="Century Gothic", color='#7386D5')
+    }
 
-    bar_chart.update_layout(
-        font=dict(family="Century Gothic", color="#7386D5")
-    )
-
-    plot_div_bar = plot({'data': bar_chart}, output_type='div')
+    plot_div_bar = plot({'data': bar_chart, 'layout': layout_bar},
+                        output_type='div')
 
     context = {
         'plot_div_pie': plot_div_pie,
