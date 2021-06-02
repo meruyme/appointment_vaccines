@@ -1,4 +1,12 @@
 .center{
+    height: calc(100vh - 56px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: #7386D5;
+}
+
+.center-login{
     height: 100vh;
     display: flex;
     justify-content: center;
@@ -55,6 +63,7 @@ h1{
         visibility: visible;
     }
     #section-to-print {
+        text-align: left;
         font-size: xx-large;
         position: fixed;
         left: 0;
