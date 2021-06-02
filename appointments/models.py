@@ -30,8 +30,8 @@ class UserManager(BaseUserManager):
 
 class User(AbstractBaseUser):
     email = models.EmailField(verbose_name="E-mail", unique=True)
-    name = models.CharField(verbose_name="Nome completo", max_length=200)
-    date_birth = models.DateField(verbose_name="Data de nascimento")
+    name = models.CharField(verbose_name="Nome completo", max_length=200, blank=False)
+    date_birth = models.DateField(verbose_name="Data de nascimento", blank=False)
     is_active = models.BooleanField(default=True)
     is_admin = models.BooleanField(default=False, verbose_name="Administrador")
 
@@ -47,7 +47,7 @@ class User(AbstractBaseUser):
         return self.email
 
     def __str__(self):
-        return self.email
+        return self.name
 
     def has_perm(self, perm, obj=None):
         return True
@@ -104,16 +104,19 @@ class ServiceGroup(models.Model):
     class Meta:
         verbose_name = "Grupo de atendimento"
         verbose_name_plural = "Grupos de atendimento"
-        ordering = ['-name', '-min_age']
+        ordering = ['name', 'min_age']
 
 
 class AvailableAppointments(models.Model):
     date_appointment = models.DateField(verbose_name="Data")
     time_appointment = models.TimeField(verbose_name="Horário")
-    id_vaccine = models.ForeignKey(Vaccine, on_delete=models.CASCADE, verbose_name="Vacina")
+    vacancies = models.IntegerField(verbose_name="Número de vagas")
+    vaccine = models.ForeignKey(Vaccine, on_delete=models.CASCADE, verbose_name="Vacina")
+    location = models.ForeignKey(VaccineLocation, on_delete=models.CASCADE,
+                                 verbose_name="Local de vacinação")
 
     def __str__(self):
-        return f"{self.date_appointment} ({self.time_appointment}) - {self.id_vaccine.name}"
+        return f"{self.date_appointment} ({self.time_appointment}) - {self.vaccine.name}"
 
     class Meta:
         verbose_name = "Agendamento disponível"
@@ -128,46 +131,15 @@ class Appointments(models.Model):
         ("V", "Vacinado")
     )
     status = models.CharField(max_length=1, choices=STATUS_CHOICES, default="A")
-    id_available = models.ForeignKey(AvailableAppointments, on_delete=models.CASCADE,
-                                     verbose_name="Agendamento escolhido")
-    id_group = models.ForeignKey(ServiceGroup, on_delete=models.CASCADE, verbose_name="Grupo de atendimento")
-    id_citizen = models.OneToOneField(Citizen, on_delete=models.CASCADE, verbose_name="Cidadão")
+    available = models.ForeignKey(AvailableAppointments, on_delete=models.CASCADE,
+                                  verbose_name="Agendamento escolhido")
+    group = models.ForeignKey(ServiceGroup, on_delete=models.CASCADE, verbose_name="Grupo de atendimento")
+    citizen = models.OneToOneField(Citizen, on_delete=models.CASCADE, verbose_name="Cidadão")
 
     def __str__(self):
-        return f"{self.id_citizen.name}: {self.id_available.__str__()} " \
-               f"- {self.id_group.__str__()}"
+        return f"{self.citizen.name}: {self.available.__str__()} " \
+               f"- {self.group.__str__()}"
 
     class Meta:
         verbose_name = "Agendamento"
         verbose_name_plural = "Agendamentos"
-
-
-class VaccinationRoom(models.Model):
-    name = models.CharField(verbose_name="Sala de vacinação", max_length=200)
-    id_location = models.ForeignKey(VaccineLocation, on_delete=models.CASCADE, verbose_name="Ponto de vacinação")
-
-    def __str__(self):
-        return f"{self.name} - {self.id_location.__str__()}"
-
-    def get_location(self):
-        return self.id_location.name
-    get_location.short_description = 'Ponto de vacinação'
-
-    class Meta:
-        verbose_name = "Sala de vacinação"
-        verbose_name_plural = "Salas de vacinação"
-        ordering = ['name']
-
-
-class AppointmentRoom(models.Model):
-    vacancies = models.IntegerField(verbose_name="Número de vagas")
-    id_room = models.ForeignKey(VaccinationRoom, on_delete=models.CASCADE, verbose_name="Sala de vacinação")
-    id_appointment = models.ForeignKey(AvailableAppointments, on_delete=models.CASCADE,
-                                       verbose_name="Agendamento disponível")
-
-    def __str__(self):
-        return f"{self.id_appointment.__str__()} - {self.id_room.__str__()} - {self.vacancies} vagas"
-
-    class Meta:
-        verbose_name = "Quantidade de vagas para o agendamento"
-        verbose_name_plural = "Quantidades de vagas para o agendamento"

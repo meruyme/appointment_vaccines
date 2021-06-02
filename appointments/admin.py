@@ -3,8 +3,7 @@ from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from appointments.forms import UserAdminCreationForm, UserChangeForm
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import Group
-from appointments.models import VaccineLocation, Vaccine, ServiceGroup, Appointments, AvailableAppointments, \
-    VaccinationRoom, AppointmentRoom
+from appointments.models import VaccineLocation, Vaccine, ServiceGroup, Appointments, AvailableAppointments
 
 User = get_user_model()
 
@@ -31,10 +30,6 @@ class UserAdmin(BaseUserAdmin):
     ordering = ['name']
 
 
-class VaccinationRoomAdmin(admin.ModelAdmin):
-    list_display = ('name', 'get_location')
-
-
 class VaccineLocationAdmin(admin.ModelAdmin):
     list_display = ('name', 'address', 'neighborhood', 'city')
 
@@ -51,6 +46,5 @@ admin.site.register(Vaccine, VaccineAdmin)
 admin.site.register(VaccineLocation, VaccineLocationAdmin)
 admin.site.register(ServiceGroup)
 admin.site.register(AvailableAppointments)
-admin.site.register(VaccinationRoom, VaccinationRoomAdmin)
 admin.site.register(Appointments)
-admin.site.register(AppointmentRoom)
+
