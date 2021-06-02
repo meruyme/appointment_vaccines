@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+
+{% load bootstrap4 %}
+
+
+{% block base_head %}
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/forms.css' %}">
+    <title>Realizar agendamento</title>
+    {% bootstrap_css %}
+{% endblock base_head %}
+{% block content %}
+    {% url 'pesquisa' as pesquisa_url %}
+    {% url 'realizar_agendamento' as agendamento_url %}
+
+    <div class="center">
+        <div class="container">
+            <div class="row justify-content-center">
+                <div class="col-6">
+                    <div class="card">
+                        <div class="card-body">
+                            <h1>Realizar agendamento</h1>
+                            {% bootstrap_messages %}
+                            {% if request.path == pesquisa_url %}
+                                <form action="{% url 'pesquisa' %}" method="POST" class="form" novalidate>
+                                    {% csrf_token %}
+                                    {% bootstrap_form form %}
+                                    <div>
+                                        <button class="btn btn-primary btn-block text-uppercase" type="submit">Pesquisar</button>
+                                    </div>
+                                </form>
+                            {% endif %}
+                            {% if request.path == agendamento_url %}
+                                <form action="{{ agendamento_url }}" method="POST" class="form" novalidate>
+                                    {% csrf_token %}
+                                    {% bootstrap_form form %}
+                                    <div>
+                                        <button class="btn btn-primary btn-block text-uppercase" type="submit">Salvar</button>
+                                    </div>
+                                </form>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% bootstrap_javascript jquery='full'%}
+{% endblock %}

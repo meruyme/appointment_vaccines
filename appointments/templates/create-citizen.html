@@ -1,0 +1,32 @@
+{% load bootstrap4 %}
+
+<head>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/forms.css' %}">
+    <title>Cadastro de usuário</title>
+    {% bootstrap_css %}
+</head>
+<body>
+<div class="center">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-6">
+                <div class="card">
+                    <div class="card-body">
+                        <h1>Cadastro de usuário</h1>
+                        {% bootstrap_messages %}
+                        <form action="{% url 'cadastro' %}" method="POST" class="form" novalidate>
+                            {% csrf_token %}
+                            {% bootstrap_form form %}
+                            <div class="center-button">
+                                <button class="btn btn-primary btn-block text-uppercase" type="submit">Cadastrar</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% bootstrap_javascript jquery='full'%}
+</body>

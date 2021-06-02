@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+
+{% load bootstrap4 %}
+
+{% block base_head %}
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/forms.css' %}">
+    <title>Ver agendamento</title>
+    {% bootstrap_css %}
+{% endblock base_head %}
+{% block content %}
+    <div class="center">
+        <div class="container">
+            <div class="row justify-content-center">
+                <div class="col-6">
+                    <div class="card">
+                        <div class="card-body">
+                            <div id="section-to-print">
+                                {% for key, value in info.items %}
+                                    <div style="padding: 7px">
+                                        <span class="span-color">{{ key }}:</span>
+                                        <span>{{ value }}</span>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                            <div style="padding-top: 5px">
+                                <button class="btn btn-primary btn-block text-uppercase" onclick="window.print()">Imprimir comprovante</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% bootstrap_javascript jquery='full'%}
+{% endblock %}

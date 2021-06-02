@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+
+{% load bootstrap4 %}
+
+{% block base_head %}
+    {% load static %}
+    <title>Principal</title>
+    {% bootstrap_css %}
+{% endblock base_head %}
+{% block content %}
+    <div class="center">
+        <div style="padding-right: 10px; padding-left: 10px">
+            {% bootstrap_messages %}
+        </div>
+        <h1>Testando</h1>
+    </div>
+    {% bootstrap_javascript jquery='full'%}
+{% endblock %}
