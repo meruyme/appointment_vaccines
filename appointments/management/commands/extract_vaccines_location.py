@@ -8,19 +8,19 @@ class Command(BaseCommand):
         pass
 
     def handle(self, *args, **options):
+        locations_array = []
 
         def populate_locations(row):
-            l, created = VaccineLocation.objects.update_or_create(cnes=row['cod_cnes'],
-                                                                  defaults={'name': row['nom_estab'],
-                                                                            'address': row['dsc_endereco'],
-                                                                            'neighborhood': row['dsc_bairro'],
-                                                                            'city': row['dsc_cidade']})
+            locations_array.append(
+                VaccineLocation(cnes=row['cod_cnes'], name=row['nom_estab'], address=row['dsc_endereco'],
+                                neighborhood=row['dsc_bairro'], city=row['dsc_cidade']))
 
         try:
             print("Importando os locais de vacina...")
             locations = pd.read_csv("appointments/inputs/ubs.csv", encoding='utf-8')
             print("Adicionando no banco de dados...")
             locations.apply(populate_locations, axis=1)
+            VaccineLocation.objects.bulk_create(locations_array)
             print("O csv foi importado com sucesso.")
 
         except FileNotFoundError:
