@@ -1,11 +1,14 @@
 from django.contrib.auth import logout, authenticate, login
 from django.contrib.auth.decorators import login_required
 from django.db import transaction
-from django.http import HttpResponseRedirect
 from django.shortcuts import render, redirect
 from django.contrib import messages
 from appointments.forms import AutoCreateUserForm, CreateAppointmentForm, SearchAppointmentAvailableForm
-from appointments.models import AvailableAppointments, Appointments, ServiceGroup
+from appointments.models import Appointments, ServiceGroup, Vaccine
+from plotly.offline import plot
+from datetime import datetime, timedelta, date
+import pandas as pd
+import plotly.express as px
 
 
 def create_citizen(request):
@@ -50,7 +53,6 @@ def check_appointment(request):
                 return redirect('realizar_agendamento')
         else:
             form = CreateAppointmentForm(request.user, request)
-        print(request.path)
         context = {
             'form': form,
         }
@@ -62,34 +64,36 @@ def check_appointment(request):
 
 @login_required
 def create_appointment(request):
-    chosen_date = request.session['chosen_date']
-    vaccine = request.session['vaccine']
-    id_group = request.session['group']
-    city = request.session['city']
-    if request.method == 'POST':
-        form = SearchAppointmentAvailableForm(chosen_date, vaccine, id_group, city, request.POST)
-        if form.is_valid():
-            chosen_appointment = form.cleaned_data.get('appointments_available')
-            print(chosen_appointment.date_appointment)
-            group = ServiceGroup.objects.get(id=id_group)
-            a = Appointments(citizen=request.user, group=group, available=chosen_appointment)
-            with transaction.atomic():
-                chosen_appointment.vacancies -= 1
-                chosen_appointment.save(force_update=True)
-                a.save()
-            request.session.pop('chosen_date')
-            request.session.pop('vaccine')
-            request.session.pop('group')
-            request.session.pop('city')
-            request.session.modified = True
-            messages.success(request, "O agendamento foi realizado com sucesso!")
-            return redirect('index')
+    if 'chosen_date' in request.session:
+        chosen_date = request.session['chosen_date']
+        vaccine = request.session['vaccine']
+        id_group = request.session['group']
+        city = request.session['city']
+        if request.method == 'POST':
+            form = SearchAppointmentAvailableForm(chosen_date, vaccine, id_group, city, request.POST)
+            if form.is_valid():
+                chosen_appointment = form.cleaned_data.get('appointments_available')
+                group = ServiceGroup.objects.get(id=id_group)
+                a = Appointments(citizen=request.user, group=group, available=chosen_appointment)
+                with transaction.atomic():
+                    chosen_appointment.vacancies -= 1
+                    chosen_appointment.save(force_update=True)
+                    a.save()
+                request.session.pop('chosen_date')
+                request.session.pop('vaccine')
+                request.session.pop('group')
+                request.session.pop('city')
+                request.session.modified = True
+                messages.success(request, "O agendamento foi realizado com sucesso!")
+                return redirect('ver_agendamento')
+        else:
+            form = SearchAppointmentAvailableForm(chosen_date, vaccine, id_group, city)
+        context = {
+            'form': form,
+        }
+        return render(request, 'create-appointment.html', context=context)
     else:
-        form = SearchAppointmentAvailableForm(chosen_date, vaccine, id_group, city)
-    context = {
-        'form': form,
-    }
-    return render(request, 'create-appointment.html', context=context)
+        return redirect('index')
 
 
 @login_required
@@ -99,8 +103,8 @@ def show_appointment(request):
         data = query[0]
         context = {
             'info': {
-                'Dia do agendamento': f"{data.available.date_appointment.strftime('%d/%m/%Y')} "
-                                      f"às {data.available.time_appointment.strftime('%H:%M')}",
+                'Dia da vacinação': f"{data.available.date_appointment.strftime('%d/%m/%Y')} "
+                                    f"às {data.available.time_appointment.strftime('%H:%M')}",
                 'Nome do cidadão': request.user.name,
                 'Grupo de atendimento': data.group,
                 'Local de vacinação': data.available.location.name,
@@ -112,3 +116,62 @@ def show_appointment(request):
     else:
         messages.error(request, "Você ainda não possui agendamentos.")
         return redirect('index')
+
+
+def create_charts(request):
+    labels_pie = []
+    values_pie = []
+
+    query = Vaccine.objects.order_by().values_list('manufacturer', flat=True).distinct()
+    for manufacturer in query:
+        quantity_appointments = Appointments.objects.filter(
+            available__vaccine__manufacturer=manufacturer).count()
+        if quantity_appointments > 0:
+            labels_pie.append(manufacturer)
+            values_pie.append(quantity_appointments)
+
+    d_pie = {'Fabricante': labels_pie, 'Agendamentos': values_pie}
+    df_pie = pd.DataFrame(d_pie)
+
+    pie_chart = px.pie(df_pie, values='Agendamentos', names='Fabricante',
+                       title='Agendamentos por fabricante', width=560, height=420,
+                       color_discrete_sequence=px.colors.sequential.Purp)
+    pie_chart.update_layout(
+        font=dict(family="Century Gothic", color="#7386D5")
+    )
+    plot_div_pie = plot({'data': pie_chart},
+                        output_type='div')
+
+    labels_bar = []
+    values_bar = []
+    dates = []
+    today = date.today()
+
+    for i in range(6, -1, -1):
+        dates.append(today - timedelta(days=i))
+
+    for day in dates:
+        labels_bar.append(day.strftime('%d/%m'))
+        appointments_date = Appointments.objects.filter(
+            date=day).count()
+        values_bar.append(appointments_date)
+
+    d_bar = {'Dia': labels_bar, 'Agendamento': values_bar}
+    df_bar = pd.DataFrame(d_bar)
+
+    bar_chart = px.bar(df_bar, y='Agendamento', x='Dia',
+                       title='Agendamentos nos últimos 7 dias', width=560, height=420,
+                       color_discrete_sequence=px.colors.sequential.Purp)
+
+    bar_chart.update_layout(
+        font=dict(family="Century Gothic", color="#7386D5")
+    )
+
+    plot_div_bar = plot({'data': bar_chart}, output_type='div')
+
+    context = {
+        'plot_div_pie': plot_div_pie,
+        'plot_div_bar': plot_div_bar
+    }
+
+    return render(request, 'index.html', context=context)

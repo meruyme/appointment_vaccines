@@ -3,7 +3,7 @@ from appointments import views
 from django.contrib.auth import views as auth_views
 
 urlpatterns = [
-    path('', views.index, name='index'),
+    path('', views.create_charts, name='index'),
     path('login/', auth_views.LoginView.as_view(), name='login'),
     path('cadastro/', views.create_citizen, name='cadastro'),
     path('logout/', views.logout_user, name='logout'),
