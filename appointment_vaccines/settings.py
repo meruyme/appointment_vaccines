@@ -35,7 +35,9 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'appointments.apps.AppointmentsConfig'
+    'appointments.apps.AppointmentsConfig',
+    'bootstrapform',
+    'bootstrap4'
 ]
 
 MIDDLEWARE = [
@@ -50,10 +52,16 @@ MIDDLEWARE = [
 
 ROOT_URLCONF = 'appointment_vaccines.urls'
 
+STATICFILES_DIRS = [
+    os.path.join(BASE_DIR, 'static'),
+    os.path.join(BASE_DIR, 'appointments/static'),
+]
+
+
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [os.path.join(BASE_DIR, 'templates')],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -87,6 +95,8 @@ DATABASES = {
     }
 }
 
+# AUTHENTICATION_BACKENDS = ('appointments.backends.EmailBackend',)
+
 
 # Password validation
 # https://docs.djangoproject.com/en/3.2/ref/settings/#auth-password-validators
@@ -97,6 +107,7 @@ AUTH_PASSWORD_VALIDATORS = [
     },
     {
         'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
+        'OPTIONS': {'min_length': 8}
     },
     {
         'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
@@ -104,6 +115,10 @@ AUTH_PASSWORD_VALIDATORS = [
     {
         'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
     },
+    {'NAME': 'appointments.validators.NumberValidator'},
+    {'NAME': 'appointments.validators.UppercaseValidator'},
+    {'NAME': 'appointments.validators.LowercaseValidator'},
+    {'NAME': 'appointments.validators.SymbolValidator'},
 ]
 
 
@@ -130,3 +145,6 @@ STATIC_URL = '/static/'
 # https://docs.djangoproject.com/en/3.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+LOGIN_URL = 'login'
+LOGIN_REDIRECT_URL = 'index'
