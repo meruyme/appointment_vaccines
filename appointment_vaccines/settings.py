@@ -37,7 +37,8 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'appointments.apps.AppointmentsConfig',
     'bootstrapform',
-    'bootstrap4'
+    'bootstrap4',
+    'django_plotly_dash',
 ]
 
 MIDDLEWARE = [
