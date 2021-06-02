@@ -15,7 +15,9 @@
                 <div class="col-6">
                     <div class="card">
                         <div class="card-body">
+                            {% bootstrap_messages %}
                             <div id="section-to-print">
+                                <p style="text-align: center; font-weight: bold; color: #7386D5">Comprovante de agendamento</p>
                                 {% for key, value in info.items %}
                                     <div style="padding: 7px">
                                         <span class="span-color">{{ key }}:</span>

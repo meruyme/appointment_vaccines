@@ -4,15 +4,31 @@
 
 {% block base_head %}
     {% load static %}
-    <title>Principal</title>
+    <link rel="stylesheet" href="{% static 'css/forms.css' %}">
+    <title>Transparência</title>
     {% bootstrap_css %}
 {% endblock base_head %}
 {% block content %}
     <div class="center">
-        <div style="padding-right: 10px; padding-left: 10px">
-            {% bootstrap_messages %}
+        <div class="container">
+            <div class="row justify-content-center">
+                    <div class="card">
+                        <div class="card-body">
+                            <h1>Transparência</h1>
+                            {% bootstrap_messages %}
+                            <div style="display:flex; flex-direction: row; justify-content: space-around">
+                                {% load plotly_dash %}
+                                {% autoescape off %}
+                                    {{ plot_div_pie }}
+                                {% endautoescape %}
+                                {% autoescape off %}
+                                    {{ plot_div_bar }}
+                                {% endautoescape %}
+                            </div>
+                        </div>
+                    </div>
+            </div>
         </div>
-        <h1>Testando</h1>
     </div>
     {% bootstrap_javascript jquery='full'%}
 {% endblock %}

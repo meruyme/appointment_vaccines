@@ -10,7 +10,7 @@
     {% bootstrap_css %}
 {% endblock base_head %}
 {% block content %}
-    {% url 'pesquisa' as pesquisa_url %}
+    {% url 'pesquisar_agendamento' as pesquisa_url %}
     {% url 'realizar_agendamento' as agendamento_url %}
 
     <div class="center">
@@ -22,7 +22,7 @@
                             <h1>Realizar agendamento</h1>
                             {% bootstrap_messages %}
                             {% if request.path == pesquisa_url %}
-                                <form action="{% url 'pesquisa' %}" method="POST" class="form" novalidate>
+                                <form action="{{ pesquisa_url }}" method="POST" class="form" novalidate>
                                     {% csrf_token %}
                                     {% bootstrap_form form %}
                                     <div>
