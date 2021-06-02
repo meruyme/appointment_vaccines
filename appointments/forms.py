@@ -1,5 +1,5 @@
 from django import forms
-from django.contrib.auth import get_user_model, password_validation, authenticate
+from django.contrib.auth import get_user_model, password_validation
 from django.contrib.auth.forms import ReadOnlyPasswordHashField
 from django.core.exceptions import ValidationError
 from django.forms import ModelChoiceField
@@ -77,7 +77,7 @@ class AutoCreateUserForm(UserAdminCreationForm):
         exclude = ('is_admin',)
         widgets = {
             'date_birth': forms.DateInput(
-                format=('%Y-%m-%d'),
+                format='%d/%m/%Y',
                 attrs={'class': 'form-control',
                        'placeholder': 'Selecione uma data',
                        'type': 'date'
@@ -94,7 +94,7 @@ class CreateAppointmentForm(forms.Form):
         self.fields['group'] = forms.ModelChoiceField(label='Grupo de atendimento', empty_label=None,
                                                       queryset=ServiceGroup.objects.filter(min_age__lte=age))
 
-    date_appointment = forms.CharField(label='Dia', widget=forms.DateInput(format=('%Y-%m-%d'),
+    date_appointment = forms.CharField(label='Dia', widget=forms.DateInput(format='%d/%m/%Y',
                                                                            attrs={'class': 'form-control',
                                                                                   'placeholder': 'Selecione uma data',
                                                                                   'type': 'date'
@@ -108,7 +108,6 @@ class CreateAppointmentForm(forms.Form):
         cleaned_data = super(CreateAppointmentForm, self).clean()
         chosen_date = cleaned_data.get("date_appointment")
         vaccine = cleaned_data.get("vaccine").name
-        group = cleaned_data.get("group").id
         city = cleaned_data.get("city").city
         get_appointments_date = AvailableAppointments.objects.filter(date_appointment=chosen_date,
                                                                      location__city=city,
