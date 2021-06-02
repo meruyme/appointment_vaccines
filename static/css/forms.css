@@ -1,0 +1,63 @@
+.center{
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: #7386D5;
+}
+
+* {
+    font-family: "Century Gothic";
+}
+
+.container{
+    margin: 0;
+}
+
+.links-wrapper {
+    justify-content: center;
+    display: flex;
+    text-align: center;
+}
+
+h1{
+    padding-bottom: 10px;
+    text-align: center;
+    color: #7386D5;
+}
+
+.form-control.is-valid{
+    background-image: none!important;
+}
+
+.btn-primary, .btn-primary:hover, .btn-primary:active, .btn-primary:visited {
+    background-color: #7386D5 !important;
+    border-color: #7386D5 !important;
+}
+
+.center-button{
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+}
+
+.span-color{
+    font-weight: bold !important;
+    color: #7386D5;
+}
+
+@media print {
+    body * {
+        visibility: hidden;
+    }
+    #section-to-print, #section-to-print * {
+        visibility: visible;
+    }
+    #section-to-print {
+        font-size: xx-large;
+        position: fixed;
+        left: 0;
+        top: 0;
+    }
+}
