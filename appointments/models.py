@@ -111,6 +111,7 @@ class AvailableAppointments(models.Model):
     date_appointment = models.DateField(verbose_name="Data")
     time_appointment = models.TimeField(verbose_name="Horário")
     vacancies = models.IntegerField(verbose_name="Número de vagas")
+    group = models.ForeignKey(ServiceGroup, on_delete=models.CASCADE, verbose_name="Grupo de atendimento")
     vaccine = models.ForeignKey(Vaccine, on_delete=models.CASCADE, verbose_name="Vacina")
     location = models.ForeignKey(VaccineLocation, on_delete=models.CASCADE,
                                  verbose_name="Local de vacinação")
@@ -133,13 +134,12 @@ class Appointments(models.Model):
     status = models.CharField(max_length=1, choices=STATUS_CHOICES, default="A")
     available = models.ForeignKey(AvailableAppointments, on_delete=models.CASCADE,
                                   verbose_name="Agendamento escolhido")
-    group = models.ForeignKey(ServiceGroup, on_delete=models.CASCADE, verbose_name="Grupo de atendimento")
     citizen = models.OneToOneField(Citizen, on_delete=models.CASCADE, verbose_name="Cidadão")
     date = models.DateField(verbose_name="Data do agendamento", auto_now_add=True)
 
     def __str__(self):
         return f"{self.citizen.name}: {self.available.__str__()} " \
-               f"- {self.group.__str__()}"
+               f"- {self.available.group.__str__()}"
 
     class Meta:
         verbose_name = "Agendamento"

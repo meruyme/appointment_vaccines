@@ -46,7 +46,7 @@ def check_appointment(request):
             form = CreateAppointmentForm(request.user, request, request.POST)
             if form.is_valid():
                 request.session['chosen_date'] = form.cleaned_data.get("date_appointment")
-                request.session['vaccine'] = form.cleaned_data.get("vaccine").name
+                request.session['vaccine'] = form.cleaned_data.get("vaccine").id
                 request.session['group'] = form.cleaned_data.get("group").id
                 request.session['city'] = form.cleaned_data.get("city").city
                 return redirect('realizar_agendamento')
@@ -65,15 +65,14 @@ def check_appointment(request):
 def create_appointment(request):
     if 'chosen_date' in request.session:
         chosen_date = request.session['chosen_date']
-        vaccine = request.session['vaccine']
+        id_vaccine = request.session['vaccine']
         id_group = request.session['group']
         city = request.session['city']
         if request.method == 'POST':
-            form = SearchAppointmentAvailableForm(chosen_date, vaccine, id_group, city, request.POST)
+            form = SearchAppointmentAvailableForm(chosen_date, id_vaccine, id_group, city, request.POST)
             if form.is_valid():
                 chosen_appointment = form.cleaned_data.get('appointments_available')
-                group = ServiceGroup.objects.get(id=id_group)
-                a = Appointments(citizen=request.user, group=group, available=chosen_appointment)
+                a = Appointments(citizen=request.user, available=chosen_appointment)
                 with transaction.atomic():
                     chosen_appointment.vacancies -= 1
                     chosen_appointment.save(force_update=True)
@@ -86,7 +85,7 @@ def create_appointment(request):
                 messages.success(request, "O agendamento foi realizado com sucesso!")
                 return redirect('ver_agendamento')
         else:
-            form = SearchAppointmentAvailableForm(chosen_date, vaccine, id_group, city)
+            form = SearchAppointmentAvailableForm(chosen_date, id_vaccine, id_group, city)
         context = {
             'form': form,
         }
@@ -105,7 +104,7 @@ def show_appointment(request):
                 'Dia da vacinação': f"{data.available.date_appointment.strftime('%d/%m/%Y')} "
                                     f"às {data.available.time_appointment.strftime('%H:%M')}",
                 'Nome do cidadão': request.user.name,
-                'Grupo de atendimento': data.group,
+                'Grupo de atendimento': data.available.group,
                 'Local de vacinação': data.available.location.name,
                 'Endereço': f"{data.available.location.address}, bairro {data.available.location.neighborhood}",
                 'Cidade': data.available.location.city

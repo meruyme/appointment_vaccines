@@ -100,18 +100,20 @@ class CreateAppointmentForm(forms.Form):
                                                                                   'type': 'date'
                                                                                   }))
     vaccine = forms.ModelChoiceField(label='Vacina', empty_label=None,
-                                     queryset=Vaccine.objects.all().distinct('name'))
+                                     queryset=Vaccine.objects.all().distinct())
     city = CityModelChoiceField(label='Cidade', empty_label=None,
                                 queryset=VaccineLocation.objects.all().distinct('city'))
 
     def clean(self):
         cleaned_data = super(CreateAppointmentForm, self).clean()
         chosen_date = cleaned_data.get("date_appointment")
-        vaccine = cleaned_data.get("vaccine").name
+        vaccine = cleaned_data.get("vaccine").id
+        group = cleaned_data.get("group").id
         city = cleaned_data.get("city").city
         get_appointments_date = AvailableAppointments.objects.filter(date_appointment=chosen_date,
                                                                      location__city=city,
-                                                                     vaccine__name=vaccine,
+                                                                     vaccine__id=vaccine,
+                                                                     group__id=group,
                                                                      vacancies__gt=0)
         if not get_appointments_date.exists():
             self.add_error('date_appointment', "Não existe um agendamento disponível para esses dados.")
@@ -123,12 +125,13 @@ class SearchAppointmentAvailableForm(forms.Form):
     def __init__(self, chosen_date, vaccine, id_group, city, *args, **kwargs):
         super(SearchAppointmentAvailableForm, self).__init__(*args, **kwargs)
         self.chosen_date = chosen_date
-        self.vaccine = vaccine
+        self.id_vaccine = vaccine
         self.id_group = id_group
         self.city = city
         get_appointments_date = AvailableAppointments.objects.filter(date_appointment=chosen_date,
                                                                      location__city=city,
-                                                                     vaccine__name=vaccine,
+                                                                     vaccine__id=vaccine,
+                                                                     group__id=id_group,
                                                                      vacancies__gt=0)
         self.fields['appointments_available'] = AppointmentModelChoiceField(label='Agendamentos disponíveis',
                                                                             empty_label=None,
