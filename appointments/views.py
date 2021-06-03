@@ -4,7 +4,7 @@ from django.db import transaction
 from django.shortcuts import render, redirect
 from django.contrib import messages
 from appointments.forms import AutoCreateUserForm, CreateAppointmentForm, SearchAppointmentAvailableForm
-from appointments.models import Appointments, ServiceGroup, Vaccine
+from appointments.models import Appointments, Vaccine
 from plotly.offline import plot
 from datetime import datetime, timedelta, date
 import plotly.graph_objects as go
